@@ -2,14 +2,14 @@ import puppeteer from 'puppeteer';
 import XLSX from "xlsx";
 let count = 0;
 let objData = [];
-let MAXDATA=150;
+let MAXDATA=200;
 
 (async () => {
 
-  const searchFields = 'education';
-  const country = 'india';
-  const industry = 'education';
-  const companySizeId = '#companySize-H';
+  const searchFields = 'technology';
+  const country = 'canada';
+  const industry = 'it';
+  const companySizeId = '#companySize-F';
   const email = 'new84779911@gmail.com';
   const password = 'rahulhero890';
 
@@ -26,7 +26,7 @@ let MAXDATA=150;
   */
 
 
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: false ,slowMo:30});
   const page = await browser.newPage();
 
   await page.goto('https://linkedin.com', {
@@ -40,15 +40,15 @@ let MAXDATA=150;
 
 
   await page.waitForSelector('#session_key');
-  await page.type('#session_key', email, { delay: 100 });
+  await page.type('#session_key', email);
   await page.waitForSelector('#session_password');
-  await page.type('#session_password', password, { delay: 100 });
+  await page.type('#session_password', password);
   await page.keyboard.press('Enter');
   await page.waitForNavigation();
 
   //getting the company button 
   await page.waitForSelector('.search-global-typeahead__input');
-  await page.type('.search-global-typeahead__input', searchFields, { delay: 100 });
+  await page.type('.search-global-typeahead__input', searchFields);
   await page.keyboard.press('Enter');
   await page.waitForNavigation();
 
@@ -65,7 +65,7 @@ let MAXDATA=150;
     }
   }
   
-  delay(1000);
+  // delay(1000);
 
   const companyBtn = await btn[index].$('button');
   await companyBtn.click();
@@ -85,10 +85,11 @@ let MAXDATA=150;
   const Allbuttons = await page.$$('button[data-control-name="filter_show_results"]')
   await Allbuttons[2].click();
 
-
-
-  while (true) {
+  while (true) 
+    {
     try {
+
+      if(MAXDATA==0)break;
       await dataFetch(page, browser);
       const nextBtn = await page.waitForSelector('button[aria-label="Next"]');
       let continueOrNot = await page.evaluate(element => element.disabled, nextBtn);
@@ -105,7 +106,7 @@ let MAXDATA=150;
   }
 
   console.log(objData);
-  toExcel(objData, country, searchFields);
+  toExcel(objData, country, searchFields,industry);
 
   await browser.close();
 
@@ -116,7 +117,7 @@ async function filters(id, placeholder, select, page, index) {
   await locationFilter.click();
 
   const currentInput = await page.waitForSelector(`input[placeholder="${placeholder}"]`);
-  await currentInput.type(select, { delay: 300 });
+  await currentInput.type(select);
 
 
   let idLocationSuggestion = await page.$eval(`input[placeholder="${placeholder}"]`,
@@ -160,20 +161,19 @@ async function dataFetch(page, browser)
   let links = [];
   const dataContainer = await page.waitForSelector('.search-results-container');
   let listCard = await dataContainer.$$('.reusable-search__result-container');
-
+  
   for (let i in listCard) 
-  {
-    let val = listCard[i];
-    let sizeOfData = await val.$$('div');
-    if (sizeOfData.length > 1) 
     {
-       let anchor = await val.$('a');
-       const linkaddress = await page.evaluate(element => element.getAttribute('href'), anchor);
-       links.push(linkaddress + 'about/');
-    }
-  };
-
-
+      let val = listCard[i];
+      let sizeOfData = await val.$$('div');
+      if (sizeOfData.length > 1) 
+      {
+         let anchor = await val.$('a');
+         const linkaddress = await page.evaluate(element => element.getAttribute('href'), anchor);
+         links.push(linkaddress + 'about/');
+      }
+    };
+    
 
   for (let i in links) 
   {
@@ -204,8 +204,8 @@ async function fetchDataValue(link, browser) {
   await page.setViewport({ width: 1080, height: 1024 });
 
 
-  // Delay for around 2 seconds
-  await delay(2000);
+  //Delay for around 2 seconds
+  await delay(800);
 
   const fetchingValues = await page.evaluate(() => {
     let tempData = {};
@@ -220,7 +220,7 @@ async function fetchDataValue(link, browser) {
       const dt = Array.from(datalist.querySelectorAll('dt')); 
       const dd = Array.from(datalist.querySelectorAll('dd')); 
 
-      const neededFields = ['Website', 'Industry', 'Company size', 'Headquarters', 'Phone'];
+      const neededFields = ['Website', 'Industry', 'Company size', 'Headquarters', 'Phone','Founded'];
       let index = 0;
 
       dt.forEach((val) => {
@@ -256,12 +256,12 @@ async function fetchDataValue(link, browser) {
   return fetchingValues;
 }
 
-function toExcel(data, country, searchFields)
+function toExcel(data, country, searchFields,industry)
 {
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-  XLSX.writeFile(wb, `${country}${searchFields}data.xlsx`);
+  XLSX.writeFile(wb, `${country + searchFields + industry}data.xlsx`);
 
 }
 

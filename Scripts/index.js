@@ -9,7 +9,7 @@ let MAXDATA=5;
 
   //Inputs
   const searchFields = 'technology';
-  const country = 'russia'
+  const country = 'brazil'
   const industry = 'it';
   const companySizeId = '#companySize-F';
   const email = '9634423121';
@@ -29,7 +29,7 @@ let MAXDATA=5;
 
 
 
-  const browser = await puppeteer.launch({ headless: false ,slowMo:30});
+  const browser = await puppeteer.launch({ headless: false ,slowMo:100});
   const page = await browser.newPage();
 
   await page.goto('https://linkedin.com', {
@@ -229,7 +229,7 @@ async function fetchDataValue(link, browser) {
 
 
   //Delay for around 2 seconds
-  await delay(800);
+  await delay(2000);
 
   const fetchingValues = await page.evaluate(() => {
     let tempData = {};
@@ -286,9 +286,11 @@ function toExcel(data, country, searchFields,industry)
 {
   const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-  XLSX.writeFile(wb, `${country + searchFields + industry}data.xlsx`);
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+  const filePath = `../ExcelData/${country}${searchFields}${industry}data.xlsx`
+  XLSX.writeFile(wb, filePath);
 }
+
 //function for delay 
 function delay(ms)
 {

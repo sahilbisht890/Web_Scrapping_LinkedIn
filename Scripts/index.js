@@ -1,5 +1,8 @@
 import puppeteer from 'puppeteer';
 import XLSX from "xlsx";
+import dotenv from 'dotenv';
+dotenv.config({path:"../loginDetails.env"});
+
 let count = 0;
 let objData = [];
 let MAXDATA=5;
@@ -9,11 +12,11 @@ let MAXDATA=5;
 
   //Inputs
   const searchFields = 'technology';
-  const country = 'brazil'
+  const country = 'paris'
   const industry = 'it';
   const companySizeId = '#companySize-F';
-  const email = '9634423121';
-  const password = 'heroSA890';
+  const email = process.env.USER;
+  const password = process.env.PASSWORD;
 
   /*
       FOR THE COMAPNY SIZE USING ID : 
